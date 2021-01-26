@@ -1,9 +1,17 @@
 #!/usr/local/bin/python3
 import numpy as np
 import matplotlib as mpl
-mpl.use('Agg')
 import matplotlib.pyplot as plt
-import time, sys, getopt, os
+from PIL import Image
+import time, sys, getopt, os, io
+mpl.use('Agg')
+
+def fig2img(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf)
+    buf.seek(0)
+    img = Image.open(buf)
+    return img
 
 def color_function(x,y,n,t):
     # From mathematica:
@@ -18,16 +26,25 @@ def custom_colormap(filename):
 
 
 def write_plot(X,Y,output,nFrames,i,my_cmap):
+
+    plotname=("output/%s%05d.png" %(output,i))
     Z = color_function(X,Y,nFrames,i)
 
-    fit,ax=plt.subplots()
-    plt.imshow(Z,cmap=my_cmap)
-    ax.axis('off')
-    plotname=("%s%05d.png" %(output,i))
+    imSize=5
+    fig=plt.figure()
+    fig.set_size_inches((imSize,imSize))
+    ax = plt.Axes(fig, [0.,0.,1.,1.])
+    #ax = plt.Axes()
+    ax.set_axis_off()
+    fig.add_axes(ax)
 
+    ax.imshow(Z,cmap=my_cmap,aspect='equal')
+    #ax.imshow(Z,cmap=my_cmap)
 
     t=time.time()
-    plt.savefig(plotname,dpi=300,bbox_inches='tight')
+    img = fig2img(fig)
+    #plt.savefig(plotname,dpi=300,bbox_inches='tight')
+    img.save(plotname,format="PNG")
     elapsed = time.time()-t
     #print("%s saved in %f s" %(plotname,elapsed))
 
