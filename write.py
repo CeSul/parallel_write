@@ -39,11 +39,10 @@ def write_plot(X,Y,output,nFrames,i,my_cmap):
     fig.add_axes(ax)
 
     ax.imshow(Z,cmap=my_cmap,aspect='equal')
+    img = fig2img(fig)
     #ax.imshow(Z,cmap=my_cmap)
 
     t=time.time()
-    img = fig2img(fig)
-    #plt.savefig(plotname,dpi=300,bbox_inches='tight')
     img.save(plotname,format="PNG")
     elapsed = time.time()-t
     #print("%s saved in %f s" %(plotname,elapsed))
@@ -53,8 +52,7 @@ def write_plot(X,Y,output,nFrames,i,my_cmap):
     write_size=os.path.getsize(plotname)
     return [elapsed,write_size]
 
-def main(argv):
-
+def set_params(argv):
     nFrames=15
     size=100
     output="plot"
@@ -83,19 +81,30 @@ def main(argv):
     print('size= %s' %size)
     print('output_template=%s%%06d.png ' %output)
 
+    return nFrames,size,output
+
+
+def main(argv):
+
+    nFrames,size,output = set_params(argv)
+
+    # Set XY coords
     x_origin=0
     y_origin=500
     x = np.arange(x_origin-size/2,x_origin+size/2,1)
     y = np.arange(y_origin-size/2,y_origin+size/2,1)
     X,Y = np.meshgrid(x,y)
 
+    # Set benchmark vars
     time=np.zeros(nFrames)
     size=np.zeros(nFrames)
 
-    my_pastel=custom_colormap("colors.txt")
+    # Custom pastel colormap
+    pastel=custom_colormap("colors.txt")
 
     for i in range(0,nFrames):
-        time[i],size[i] = write_plot(X,Y,output,nFrames,i,my_pastel)
+        time[i],size[i] = write_plot(X,Y,output,nFrames,i,pastel)
+        
     stats=size/time /1024**2
 
     print("------ Summary statistics ------")
