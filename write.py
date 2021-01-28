@@ -72,13 +72,13 @@ def main(argv):
     for i in range(0,nFiles):
         time[i] = write_data(X,Y,output,nFiles,i,hf)
 
-    stats=time*1000*1000
+    stats=time*1000
 
     print("------ Summary statistics ------")
-    print("   Average write time = %1.3f µs" %stats.mean())
-    print("   Std Dev            = %1.3f µs" %stats.std())
-    print("   Min write time     = %1.3f µs" %stats.min())
-    print("   Max write time     = %1.3f µs" %stats.max())
+    print("   Average write time = %1.3f ms" %stats.mean())
+    print("   Std Dev            = %1.3f ms" %stats.std())
+    print("   Min write time     = %1.3f ms" %stats.min())
+    print("   Max write time     = %1.3f ms" %stats.max())
     print("   Number of writes   = %06d" %nFiles)
 
 main(sys.argv[1:])
