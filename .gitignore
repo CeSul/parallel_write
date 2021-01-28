@@ -1,4 +1,5 @@
 DS_store
 *.mp4
 output/
-profile.log
+*.log
+playground.py
