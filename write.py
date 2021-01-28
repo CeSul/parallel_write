@@ -9,11 +9,12 @@ def generate_data(x,y,n,t):
 
 def write_data(X,Y,output,nFiles,i):
 
-    filename=("output/%s%05d.txt" %(output,i))
+    filename=("output/%s%05d" %(output,i))
     Z = generate_data(X,Y,nFiles,i)
 
     t=time.time()
     np.savetxt(filename,Z)
+    #np.save(filename,Z)
     elapsed = time.time()-t
 
     return elapsed
@@ -21,7 +22,7 @@ def write_data(X,Y,output,nFiles,i):
 def set_params(argv):
     nFiles=15
     size=100
-    output="plot"
+    output="data"
 
     try:
         opts,args=getopt.getopt(argv,"hn:s:0:",["nFiles=","size=", "output="])
