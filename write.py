@@ -16,8 +16,7 @@ def write_data(X,Y,output,nFiles,i):
     np.savetxt(filename,Z)
     elapsed = time.time()-t
 
-    write_size=os.path.getsize(filename)
-    return [elapsed,write_size]
+    return elapsed
 
 def set_params(argv):
     nFiles=15
@@ -64,19 +63,18 @@ def main(argv):
 
     # Set benchmark vars
     time=np.zeros(nFiles)
-    size=np.zeros(nFiles)
 
 
     for i in range(0,nFiles):
-        time[i],size[i] = write_data(X,Y,output,nFiles,i)
+        time[i] = write_data(X,Y,output,nFiles,i)
 
-    stats=size/time /1024**2
+    stats=time*1000
 
     print("------ Summary statistics ------")
-    print("   Average write speed = %1.3f MB/s" %stats.mean())
-    print("   Std Dev             = %1.3f MB/s" %stats.std())
-    print("   Min write speed     = %1.3f MB/s" %stats.min())
-    print("   Max write speed     = %1.3f MB/s" %stats.max())
-    print("   Number of writes     = %06d" %nFiles)
+    print("   Average write time = %1.3f ms" %stats.mean())
+    print("   Std Dev            = %1.3f ms" %stats.std())
+    print("   Min write time     = %1.3f ms" %stats.min())
+    print("   Max write time     = %1.3f ms" %stats.max())
+    print("   Number of writes    = %06d" %nFiles)
 
 main(sys.argv[1:])
