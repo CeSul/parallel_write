@@ -3,3 +3,4 @@ DS_store
 output/
 *.log
 playground.py
+*.html
