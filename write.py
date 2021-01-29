@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
 import numpy as np
+import multiprocessing as mp
 import time, sys, getopt, os, io
 
 def generate_data(x,y,n,t):
@@ -21,11 +22,12 @@ def write_data(X,Y,output,nFiles,i):
 
 def set_params(argv):
     nFiles=15
+    nWorkers=1
     size=100
     output="data"
 
     try:
-        opts,args=getopt.getopt(argv,"hn:s:0:",["nFiles=","size=", "output="])
+        opts,args=getopt.getopt(argv,"hn:s:o:w:",["nFiles=","size=", "output=", "nWorkers="])
     except getopt.GetoptError:
         print("plot.py -n <number_of_files> -s <array_size> -o <outfile>")
         sys.exit(2)
@@ -35,7 +37,7 @@ def set_params(argv):
             sys.exit()
         elif opt in ("-n", "--nFiles"):
             print("Setting nFiles")
-            nFiles = int(float(arg))
+            nFiles = int(arg)
         elif opt in ("-s", "--size"):
             print("Setting size")
             size = int(float(arg))
@@ -46,14 +48,14 @@ def set_params(argv):
 # Summarize params
     print('nFiles=%s' %nFiles)
     print('size= %s' %size)
-    print('output_template=%s%%06d.png ' %output)
+    print('output_template=%s%%06d.txt ' %output)
 
-    return nFiles,size,output
+    return nFiles,size,output, nWorkers
 
 
 def main(argv):
 
-    nFiles,size,output = set_params(argv)
+    nFiles,size,output,nWorkers = set_params(argv)
 
     # Set XY coords
     x_origin=0
@@ -78,4 +80,5 @@ def main(argv):
     print("   Max write time     = %1.3f ms" %stats.max())
     print("   Number of writes    = %06d" %nFiles)
 
-main(sys.argv[1:])
+if __name__=='__main__':
+    main(sys.argv[1:])
