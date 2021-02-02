@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 import numpy as np
 import multiprocessing as mp
+import queue as q
 import time, sys, getopt, os, io
 
 def generate_data(x,y,n,t):
@@ -56,12 +57,41 @@ def set_params(argv):
 
     return nFiles,size,output, nWorkers
 
+class worker(mp.Process):
+    def __init__(self,task_queue,result_queue,X,Y,output,nFiles,**kwargs):
+    #def __init__(self,task_queue,result_queue,**kwargs):
+        super(worker,self).__init__()
+        #print("In init(), Process %s starting." %self.pid)
+        self.task_queue=task_queue
+        self.result_queue=result_queue
+        self.X=X
+        self.Y=Y
+        self.nFiles=nFiles
+        self.output=output
 
+
+    def run(self):
+
+        print("Starting Process:%d " % self.pid)
+        time.sleep(1)
+        while True:
+            try:
+                #print("Getting work")
+                i = self.task_queue.get(timeout=1)
+            except q.Empty:
+                print("No more work to do")
+                #self.terminate()
+                break
+
+            elapsed=write_data(self.X,self.Y,self.output,self.nFiles,i)
+            #print("%s is SOO busy with %d" % (self.pid,i) )
+            self.result_queue.put(elapsed)
+            self.task_queue.task_done()
+        return
 def main(argv):
 
     nFiles,size,output,nWorkers = set_params(argv)
 
-    pool = mp.Pool(nWorkers)
     # Set XY coords
     x_origin=0
     y_origin=500
@@ -70,13 +100,31 @@ def main(argv):
     X,Y = np.meshgrid(x,y)
 
     # Set benchmark vars
-    time=np.zeros(nFiles)
+    elapsed=np.zeros(nFiles)
 
+
+    workers=[]
+
+    # Create work
+    for i in range(0,nFiles):
+        task_queue.put(i)
+
+    # start workers
+    for i in range(0,nWorkers):
+        w=worker(task_queue,result_queue,X,Y,output,nFiles)
+        w.start()
+        workers.append(w)
+
+    print("Waiting for work to complete...")
+    task_queue.join()
 
     for i in range(0,nFiles):
-        time[i] = pool.apply(write_data,args=(X,Y,output,nFiles,i,))
+        elapsed[i] = result_queue.get()
 
-    stats=time*1000
+
+#    for w in workers:
+#        w.terminate()
+    stats=elapsed*1000
 
     print("------ Summary statistics ------")
     print("   Average write time = %1.3f ms" %stats.mean())
@@ -85,5 +133,10 @@ def main(argv):
     print("   Max write time     = %1.3f ms" %stats.max())
     print("   Number of writes    = %06d" %nFiles)
 
+    return
+
 if __name__=='__main__':
+    __spec__ = None
+    task_queue = mp.JoinableQueue()
+    result_queue = mp.JoinableQueue()
     main(sys.argv[1:])
